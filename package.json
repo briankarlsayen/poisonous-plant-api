@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
+    "express": "^4.17.1"
+  },
+  "name": "web-scraper",
+  "version": "1.0.0",
+  "main": "plantScrapper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon plantScrapper.js"
+  },
+  "author": "blu3fire89@gmail.com",
+  "license": "ISC",
+  "description": ""
+}
