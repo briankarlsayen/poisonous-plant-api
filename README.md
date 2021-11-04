@@ -1,4 +1,4 @@
 # web scrapping
 
-1. poisonous plant api /n
+1. poisonous plant api
 2. dota hero api
