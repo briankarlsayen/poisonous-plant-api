@@ -1,4 +1,6 @@
 # web scrapping
 
-1. poisonous plant api
-2. dota hero api
+1. /plant poisonous plants api
+2. /dotahero dota heroes api
+3. /dotaitem toyota cars api
+4. /car dota items api
