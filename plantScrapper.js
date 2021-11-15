@@ -1,12 +1,15 @@
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
-// const url = 'https://en.wikipedia.org/wiki/List_of_poisonous_plants';
-const url = 'https://gaming-tools.com/warcraft-3/dota-heroes/';
+const { find } = require('domutils');
+//const url = 'https://en.wikipedia.org/wiki/List_of_poisonous_plants';
+//const url = 'https://gaming-tools.com/warcraft-3/dota-heroes/';
+
 const PORT = 5000;
 const app = express();
 
 async function getPlants () {
+  const url = 'https://en.wikipedia.org/wiki/List_of_poisonous_plants';
   try {
     const {data} = await axios.get(url)
     const $ = cheerio.load(data);
@@ -41,6 +44,7 @@ async function getPlants () {
 }
 
 async function getHero () {
+  const url = 'https://gaming-tools.com/warcraft-3/dota-heroes/';
   try{
     const {data} = await axios.get(url)
     const $ = cheerio.load(data);
@@ -80,7 +84,41 @@ async function getHero () {
   }
 }
 
-app.get('/', async(req, res) => {
+//separate cars on list
+async function getCar () {
+  console.log('getting...')
+  const url = 'https://toyota.com.ph/vehicles';
+  try{
+    const {data} = await axios.get(url)
+    const $ = cheerio.load(data);
+    const keys = [
+      "name",
+      "image",
+    ]
+    const carArr = []
+    const elementSelector = '#nav-vehicle > section'
+    $(elementSelector).each((parentIndex, parentElement) => {
+      let keyIdx = 0
+      $(parentElement).find('div > div > div').each((childrenIndex, childrenElement) => {
+        const carObj = {}
+        // const tbValue = $(childrenElement).find('figcaption').text()
+        // const tbImg = $(childrenElement).find('figure > img').attr('src')
+        $(childrenElement).children().each((grandchildrenIndex, grandchildrenElement) => {
+          const carName = $(childrenElement).find('figcaption').text().replace(/ /g, "").replace(/\n/g, "")
+          const carImg = $(childrenElement).find('figure > img').attr('src')
+          carObj[keys[0]] = carName
+          carObj[keys[1]] = carImg
+        })     
+        return carArr.push(carObj)
+      })
+    })
+    return carArr
+  } catch(err) {
+    console.log(err)
+  }
+}
+
+app.get('/plant', async(req, res) => {
   try {
     const plantData = await getPlants()
     return res.status(200).json(plantData)
@@ -92,6 +130,15 @@ app.get('/dota', async(req, res) => {
   try {
     const heroData = await getHero()
     return res.status(200).json(heroData)
+  }catch(err) {
+    console.log(err)
+  }
+})
+app.get('/car', async(req, res) => {
+  try {
+    
+    const carData = await getCar()
+    return res.status(200).json(carData)
   }catch(err) {
     console.log(err)
   }
