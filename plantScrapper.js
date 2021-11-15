@@ -1,12 +1,10 @@
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
-const { find } = require('domutils');
-//const url = 'https://en.wikipedia.org/wiki/List_of_poisonous_plants';
-//const url = 'https://gaming-tools.com/warcraft-3/dota-heroes/';
-
+const cors = require('cors')
 const PORT = 5000;
 const app = express();
+app.use(cors())
 
 async function getPlants () {
   const url = 'https://en.wikipedia.org/wiki/List_of_poisonous_plants';
@@ -80,11 +78,52 @@ async function getHero () {
     heroArr.splice(0,1)
     return heroArr
   } catch(err) {
+    return err
+  }
+}
+async function getHeroItems () {
+  const url = 'https://gaming-tools.com/warcraft-3/dota-items/';
+  try{
+    const {data} = await axios.get(url)
+    const $ = cheerio.load(data);
+    const keys = [
+      "image",
+      "name",
+      "function",
+      "sell_price",
+      "buy_price",
+    ]
+    const itemArr = []
+    const elementSelector = '#post-12457 > div > div.entry-content > div.su-table.su-table-alternate > table > tbody > tr'
+    $(elementSelector).each((parentIndex, parentElement) => {
+      let keyIdx = 0
+      const itemObj = {}
+      $(parentElement).children().each((childrenIndex, childrenElement) => {
+        let itemValue
+        let itemImg;
+        if(childrenIndex >=1) {
+          if(keyIdx === 0) {
+            itemImg = $(childrenElement).find('img').attr('src')
+            itemObj[keys[keyIdx]] = itemImg
+          } else {
+            itemValue = $(childrenElement).text()
+            itemObj[keys[keyIdx]] = itemValue
+          }
+          keyIdx++
+        }
 
+      })
+      return itemArr.push(itemObj)
+    })
+    itemArr.splice(0,1)
+    return itemArr
+  } catch(err) {
+    return err
   }
 }
 
-//separate cars on list
+getHeroItems()
+
 async function getCar () {
   console.log('getting...')
   const url = 'https://toyota.com.ph/vehicles';
@@ -101,8 +140,6 @@ async function getCar () {
       let keyIdx = 0
       $(parentElement).find('div > div > div').each((childrenIndex, childrenElement) => {
         const carObj = {}
-        // const tbValue = $(childrenElement).find('figcaption').text()
-        // const tbImg = $(childrenElement).find('figure > img').attr('src')
         $(childrenElement).children().each((grandchildrenIndex, grandchildrenElement) => {
           const carName = $(childrenElement).find('figcaption').text().replace(/ /g, "").replace(/\n/g, "")
           const carImg = $(childrenElement).find('figure > img').attr('src')
@@ -114,7 +151,7 @@ async function getCar () {
     })
     return carArr
   } catch(err) {
-    console.log(err)
+    return err
   }
 }
 
@@ -126,21 +163,32 @@ app.get('/plant', async(req, res) => {
     console.log(err)
   }
 })
-app.get('/dota', async(req, res) => {
+app.get('/dotahero', async(req, res) => {
   try {
     const heroData = await getHero()
     return res.status(200).json(heroData)
   }catch(err) {
     console.log(err)
   }
+
 })
+app.get('/dotaitem', async(req, res) => {
+  try {
+    const itemData = await getHeroItems()
+    return res.status(200).json(itemData)
+  }catch(err) {
+    console.log(err)
+  }
+})
+
 app.get('/car', async(req, res) => {
   try {
-    
     const carData = await getCar()
     return res.status(200).json(carData)
   }catch(err) {
     console.log(err)
   }
 })
+
+
 app.listen(PORT, ()=> console.log(`listening to PORT ${PORT}`))
