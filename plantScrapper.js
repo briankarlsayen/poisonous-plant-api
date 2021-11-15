@@ -190,5 +190,9 @@ app.get('/car', async(req, res) => {
   }
 })
 
+app.get('/', (req, res) => {
+  res.send('API online')
+})
+
 
 app.listen(PORT, ()=> console.log(`listening to PORT ${PORT}`))
