@@ -2,7 +2,6 @@ const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
 const cors = require('cors')
-const PORT = 5000;
 const app = express();
 app.use(cors())
 
@@ -61,7 +60,6 @@ async function getHero () {
       let keyIdx = 0
       const heroObj = {}
       $(parentElement).children().each((childrenIndex, childrenElement) => {
-        //remove img
         let imgSrc;
         const dotaImg = $(childrenElement).find('img').attr('src')
         if(childrenIndex >= 1){
@@ -125,7 +123,6 @@ async function getHeroItems () {
 getHeroItems()
 
 async function getCar () {
-  console.log('getting...')
   const url = 'https://toyota.com.ph/vehicles';
   try{
     const {data} = await axios.get(url)
@@ -160,7 +157,7 @@ app.get('/plant', async(req, res) => {
     const plantData = await getPlants()
     return res.status(200).json(plantData)
   }catch(err) {
-    console.log(err)
+    return res.status(500).json({message: err})
   }
 })
 app.get('/dotahero', async(req, res) => {
@@ -168,7 +165,7 @@ app.get('/dotahero', async(req, res) => {
     const heroData = await getHero()
     return res.status(200).json(heroData)
   }catch(err) {
-    console.log(err)
+    return res.status(500).json({message: err})
   }
 
 })
@@ -177,7 +174,7 @@ app.get('/dotaitem', async(req, res) => {
     const itemData = await getHeroItems()
     return res.status(200).json(itemData)
   }catch(err) {
-    console.log(err)
+    return res.status(500).json({message: err})
   }
 })
 
@@ -186,13 +183,15 @@ app.get('/car', async(req, res) => {
     const carData = await getCar()
     return res.status(200).json(carData)
   }catch(err) {
-    console.log(err)
+    return res.status(500).json({message: err})
   }
 })
 
 app.get('/', (req, res) => {
-  res.send('API online')
+  res.status(200).send('API online')
 })
 
 
-app.listen(PORT, ()=> console.log(`listening to PORT ${PORT}`))
+app.listen(process.env.PORT || 5890, function(){
+  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
